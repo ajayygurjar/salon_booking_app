@@ -1,17 +1,9 @@
-const sequelize = require("../config/database");
+const sequelize = require("../config/db");
+const User = require("./User");
 
 const db = {};
 
 db.sequelize = sequelize;
-
-// Test connection
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("MySQL + Sequelize connected");
-  } catch (error) {
-    console.error("Unable to connect:", error.message);
-  }
-})();
+db.User = User;
 
 module.exports = db;
