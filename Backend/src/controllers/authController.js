@@ -73,3 +73,32 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] },
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    return res.status(200).json({ success: true, user });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, phone, preferences } = req.body;
+    await User.update(
+      { name, phone, preferences },
+      { where: { id: req.user.id } },
+    );
+    const updated = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] },
+    });
+    return res.status(200).json({ success: true, user: updated });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
