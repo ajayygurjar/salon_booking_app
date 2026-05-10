@@ -14,7 +14,7 @@ exports.createStaff = async (req, res) => {
 exports.getAllStaff = async (req, res) => {
   try {
     const staff = await Staff.findAll({
-      include: Service,
+      include: [{ model: Service, as: "services" }],
     });
     res.json(staff);
   } catch (error) {
@@ -26,7 +26,7 @@ exports.getAllStaff = async (req, res) => {
 exports.getStaff = async (req, res) => {
   try {
     const staff = await Staff.findByPk(req.params.id, {
-      include: Service,
+      include: [{ model: Service, as: "services" }],
     });
 
     if (!staff) return res.status(404).json({ message: "Staff not found" });
