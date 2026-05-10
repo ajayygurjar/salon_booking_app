@@ -1,9 +1,27 @@
 const sequelize = require("../config/db");
+
 const User = require("./User");
+const Service = require("./Service");
+const Staff = require("./Staff");
 
-const db = {};
+// Junction table with proper config
+const StaffService = sequelize.define(
+  "StaffService",
+  {},
+  {
+    tableName: "staff_services",
+    timestamps: false,
+  },
+);
 
-db.sequelize = sequelize;
-db.User = User;
+// Associations
+Staff.belongsToMany(Service, { through: StaffService });
+Service.belongsToMany(Staff, { through: StaffService });
 
-module.exports = db;
+module.exports = {
+  sequelize,
+  User,
+  Service,
+  Staff,
+  StaffService,
+};
