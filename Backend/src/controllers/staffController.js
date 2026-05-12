@@ -64,12 +64,21 @@ exports.assignServices = async (req, res) => {
   try {
     const { serviceIds } = req.body;
 
+    // Add this debug line temporarily:
+    console.log("serviceIds received:", serviceIds);
+
+    if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "serviceIds must be a non-empty array" });
+    }
+
     const staff = await Staff.findByPk(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
 
-    const services = await Service.findAll({
-      where: { id: serviceIds },
-    });
+    const services = await Service.findAll({ where: { id: serviceIds } });
+
+    console.log("services found:", services.length); // debug
 
     await staff.setServices(services);
 
