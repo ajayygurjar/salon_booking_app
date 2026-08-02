@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 
 export default function Navbar() {
     const { user, logout, isAdmin } = useAuth();
+    const { connected } = useSocket();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -21,11 +23,24 @@ export default function Navbar() {
             <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
                 {user ? (
                     <>
-                        <Link to="/book" style={navLink}>Book</Link>
-                        <Link to="/appointments" style={navLink}>My Appointments</Link>
                         <Link to="/reviews" style={navLink}>Reviews</Link>
-                        {isAdmin && <Link to="/admin" style={navLink}>Admin</Link>}
-                        <span style={{ fontSize: "13px", opacity: "0.85" }}>Hi, {user.name}</span>
+                        {isAdmin ? (
+                            <Link to="/admin" style={navLink}>Admin</Link>
+                        ) : (
+                            <>
+                                <Link to="/book" style={navLink}>Book</Link>
+                                <Link to="/appointments" style={navLink}>My Appointments</Link>
+                                <Link to="/invoices" style={navLink}>Invoices</Link>
+                            </>
+                        )}
+                        <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", opacity: "0.85" }}>
+                            <span style={{
+                                width: "8px", height: "8px", borderRadius: "50%", display: "inline-block",
+                                background: connected ? "#4CAF50" : "#f44336",
+                                transition: "background 0.3s"
+                            }} />
+                            Hi, {user.name}
+                        </span>
                         <button onClick={handleLogout} style={btnStyle}>Logout</button>
                     </>
                 ) : (

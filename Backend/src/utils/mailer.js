@@ -73,4 +73,25 @@ const sendCancellationEmail = async ({ to, userName, serviceName, date, time, re
   });
 };
 
-module.exports = { sendBookingConfirmation, sendReminderEmail, sendCancellationEmail };
+const sendRescheduleEmail = async ({ to, userName, serviceName, staffName, oldDate, oldTime, newDate, newTime }) => {
+  await transporter.sendMail({
+    from:    `"GlowUp Salon" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: "Appointment Rescheduled — GlowUp Salon",
+    html: `
+      <div style="font-family:sans-serif;max-width:500px;margin:auto">
+        <h2 style="color:#C1567A">Appointment Rescheduled</h2>
+        <p>Hi <strong>${userName}</strong>, your appointment has been rescheduled.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px;color:#666">Service</td><td><strong>${serviceName}</strong></td></tr>
+          <tr><td style="padding:8px;color:#666">Stylist</td><td>${staffName}</td></tr>
+          <tr><td style="padding:8px;color:#666">Previous</td><td>${oldDate} at ${oldTime}</td></tr>
+          <tr><td style="padding:8px;color:#666">New</td><td><strong>${newDate} at ${newTime}</strong></td></tr>
+        </table>
+        <p style="color:#666;font-size:13px">See you soon! — GlowUp Salon</p>
+      </div>
+    `,
+  });
+};
+
+module.exports = { sendBookingConfirmation, sendReminderEmail, sendCancellationEmail, sendRescheduleEmail };

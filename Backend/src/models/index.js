@@ -4,6 +4,8 @@ const Service = require("./Service");
 const Staff = require("./Staff");
 const Appointment = require("./Appointment");
 const Review = require("./Review");
+const Setting = require("./Setting");
+const Invoice = require("./Invoice");
 
 const StaffService = sequelize.define(
   "StaffService",
@@ -40,6 +42,10 @@ Review.belongsTo(Appointment, {
 User.hasMany(Review, { foreignKey: "userId", as: "reviews" });
 Staff.hasMany(Review, { foreignKey: "staffId", as: "reviews" });
 Appointment.hasOne(Review, { foreignKey: "appointmentId", as: "review" });
+
+Invoice.belongsTo(Appointment, { foreignKey: "appointmentId", as: "appointment" });
+Appointment.hasOne(Invoice, { foreignKey: "appointmentId", as: "invoice" });
+
 module.exports = {
   sequelize,
   User,
@@ -48,4 +54,6 @@ module.exports = {
   StaffService,
   Appointment,
   Review,
+  Setting,
+  Invoice,
 };

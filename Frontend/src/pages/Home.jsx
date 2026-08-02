@@ -6,24 +6,58 @@ import { useAuth } from "../context/AuthContext";
 export default function Home() {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [category, setCategory] = useState("");
+    const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    const fetchServices = () => {
+        setLoading(true);
+        const params = {};
+        if (search) params.search = search;
+        if (category) params.category = category;
+
+        api.get("/services", { params })
+            .then(r => {
+                const data = r.data.services || r.data || [];
+                setServices(Array.isArray(data) ? data : []);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    };
+
     useEffect(() => {
         api.get("/services")
-            .then(r => setServices(r.data))
+            .then(r => {
+                const data = r.data.services || r.data || [];
+                const allServices = Array.isArray(data) ? data : [];
+                setServices(allServices);
+                const cats = [...new Set(allServices.filter(s => s.category).map(s => s.category))];
+                setCategories(cats);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(fetchServices, 400);
+        return () => clearTimeout(timer);
+    }, [search, category]);
 
     const handleBook = (serviceId) => {
         if (!user) { navigate("/login"); return; }
         navigate(`/book?serviceId=${serviceId}`);
     };
 
+    const inpStyle = {
+        padding: "9px 14px", border: "1px solid #ddd", borderRadius: "8px",
+        fontSize: "14px", outline: "none", boxSizing: "border-box"
+    };
+
     return (
         <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "32px 16px" }}>
-            <div style={{ textAlign: "center", marginBottom: "40px" }}>
+            <div style={{ textAlign: "center", marginBottom: "32px" }}>
                 <h1 style={{ fontSize: "32px", color: "#C1567A", marginBottom: "10px" }}>
                     Welcome to GlowUp Salon
                 </h1>
@@ -32,13 +66,25 @@ export default function Home() {
                 </p>
             </div>
 
+            <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
+                <input type="text" placeholder="Search services..." value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ ...inpStyle, flex: "1", minWidth: "200px" }} />
+                <select value={category} onChange={e => setCategory(e.target.value)} style={{ ...inpStyle, minWidth: "140px" }}>
+                    <option value="">All Categories</option>
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+            </div>
+
             <h2 style={{ marginBottom: "20px", fontSize: "20px" }}>Our Services</h2>
 
             {loading ? (
                 <p>Loading services...</p>
+            ) : services.length === 0 ? (
+                <p style={{ color: "#888" }}>No services found. Try a different search.</p>
             ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: "20px" }}>
-                    {services.filter(s => s.isActive).map(s => (
+                    {services.filter(s => s.isActive !== false).map(s => (
                         <div key={s.id} style={cardStyle}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                                 <div>

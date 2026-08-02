@@ -1,0 +1,27 @@
+# Environment files (contain secrets - never commit)
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+
+# Logs
+*.log
+logs/
+
+# Docker
+mysql_data/
+
+# Local docs (not for git)
+CLAUDE.md
+API.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

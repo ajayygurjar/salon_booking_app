@@ -1,4 +1,5 @@
 const { Review, Appointment, User, Staff, Service } = require("../models");
+const { emitEvent } = require("../utils/socketEmitter");
 
 exports.createReview = async (req, res) => {
   try {
@@ -100,6 +101,14 @@ exports.replyToReview = async (req, res) => {
     if (!review) return res.status(404).json({ message: "Review not found" });
 
     await review.update({ staffReply });
+
+    // Notify the user who left the review
+    emitEvent("review:reply", {
+      reviewId: review.id,
+      appointmentId: review.appointmentId,
+      staffReply,
+    }, `user:${review.userId}`);
+
     res.json({ success: true, message: "Reply added", review });
   } catch (error) {
     res.status(500).json({ message: error.message });

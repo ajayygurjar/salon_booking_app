@@ -24,13 +24,24 @@ const Staff = sequelize.define(
       type: DataTypes.STRING,
     },
 
+    specialization: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    workingDays: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "Mon,Tue,Wed,Thu,Fri,Sat",
+    },
+
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
   },
   {
-    freezeTableName: true, 
+    freezeTableName: true,
   },
 );
 

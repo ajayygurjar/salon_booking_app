@@ -1,7 +1,7 @@
-require("dotenv").config();
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
 
 const sequelize = require("../config/db");
-const { User, Service, Staff, StaffService } = require("../models");
+const { User, Service, Staff, StaffService, Setting } = require("../models");
 const bcrypt = require("bcryptjs");
 
 const seed = async () => {
@@ -104,24 +104,43 @@ const seed = async () => {
     }
     console.log(`${services.length} services ready`);
 
+    // ── 2b. Create default settings ─────────────────────────────────
+    const defaultSettings = [
+      { key: "workingStartHour", value: "9" },
+      { key: "workingEndHour", value: "18" },
+      { key: "salonName", value: "GlowUp Salon" },
+      { key: "cancellationPolicy", value: "Free cancellation up to 24 hours before appointment" },
+    ];
+
+    for (const s of defaultSettings) {
+      await Setting.findOrCreate({ where: { key: s.key }, defaults: s });
+    }
+    console.log("Default settings created");
+
     // ── 3. Create staff ─────────────────────────────────────────────
     const staffData = [
       {
         name: "Priya Sharma",
         email: "priya@salon.com",
         phone: "9876543210",
+        specialization: "Hair Stylist & Colorist",
+        workingDays: "Mon,Tue,Wed,Thu,Fri,Sat",
         isActive: true,
       },
       {
         name: "Ravi Kumar",
         email: "ravi@salon.com",
         phone: "9876543211",
+        specialization: "Nail Technician",
+        workingDays: "Mon,Tue,Wed,Thu,Fri,Sat",
         isActive: true,
       },
       {
         name: "Meera Patel",
         email: "meera@salon.com",
         phone: "9876543212",
+        specialization: "Skin & Spa Therapist",
+        workingDays: "Mon,Tue,Wed,Thu,Fri",
         isActive: true,
       },
     ];

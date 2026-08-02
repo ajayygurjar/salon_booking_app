@@ -26,9 +26,10 @@ export default function Book() {
     useEffect(() => {
         if (!serviceId) return;
         api.get("/staff").then(r => {
-            const capable = r.data.filter(s => {
+            const list = r.data.staff || r.data || [];
+            const capable = (Array.isArray(list) ? list : []).filter(s => {
                 const services = s.services || s.Services || [];
-                return s.isActive && services.some(sv => sv.id === +serviceId || sv.id === serviceId);
+                return s.isActive !== false && services.some(sv => sv.id === +serviceId || sv.id === serviceId);
             });
             setStaff(capable);
         }).catch(err => setError("Failed to load staff: " + err.message));
@@ -149,7 +150,8 @@ export default function Book() {
                                 background: selectedStaff === st.id ? "#FBEAF0" : "#fff"
                             }}>
                             <strong>{st.name}</strong>
-                            {st.phone && <span style={{ color: "#888", fontSize: "13px", marginLeft: "8px" }}>{st.phone}</span>}
+                            {st.specialization && <span style={{ color: "#888", fontSize: "12px", marginLeft: "8px" }}>— {st.specialization}</span>}
+                            {st.phone && <div style={{ color: "#888", fontSize: "12px", marginTop: "2px" }}>{st.phone}</div>}
                         </div>
                     ))
                 )}

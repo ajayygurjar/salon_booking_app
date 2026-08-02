@@ -4,25 +4,42 @@ import api from "../services/api";
 export default function Reviews() {
     const [reviews, setReviews] = useState([]);
     const [appts, setAppts] = useState([]);
+    const [reviewedApptIds, setReviewedApptIds] = useState([]);
     const [form, setForm] = useState({ appointmentId: "", rating: 5, comment: "" });
     const [msg, setMsg] = useState("");
+    const [submitted, setSubmitted] = useState(false);
 
-    useEffect(() => {
-        api.get("/reviews").then(r => setReviews(r.data.reviews));
-        api.get("/appointments/my").then(r =>
-            setAppts(r.data.appointments.filter(a => a.status === "completed"))
-        );
-    }, []);
+    const fetchData = () => {
+        Promise.all([
+            api.get("/reviews"),
+            api.get("/appointments/my"),
+        ]).then(([revRes, apptRes]) => {
+            const allReviews = revRes.data.reviews || [];
+            const myAppts = apptRes.data.appointments || [];
+
+            setReviews(allReviews);
+
+            const reviewedIds = allReviews.map(r => r.appointmentId);
+            setReviewedApptIds(reviewedIds);
+
+            const unreviewed = myAppts.filter(a =>
+                a.status === "completed" && !reviewedIds.includes(a.id)
+            );
+            setAppts(unreviewed);
+        });
+    };
+
+    useEffect(() => { fetchData(); }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             await api.post("/reviews", form);
-            setMsg("Review submitted!");
-            const r = await api.get("/reviews");
-            setReviews(r.data.reviews);
-            setForm({ appointmentId: "", rating: 5, comment: "" });
-        } catch (err) { setMsg(err.response?.data?.message || "Error"); }
+            setSubmitted(true);
+            fetchData();
+        } catch (err) {
+            setMsg(err.response?.data?.message || "Error");
+        }
     };
 
     const inp = { width: "100%", padding: "9px 12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", boxSizing: "border-box", marginTop: "4px" };
@@ -31,10 +48,19 @@ export default function Reviews() {
         <div style={{ maxWidth: "700px", margin: "0 auto", padding: "24px 16px" }}>
             <h2 style={{ color: "#C1567A", marginBottom: "20px" }}>Reviews</h2>
 
-            {appts.length > 0 && (
+            {submitted && (
+                <div style={{
+                    background: "#E3F5E3", color: "#27500A", padding: "14px 18px",
+                    borderRadius: "10px", marginBottom: "20px", fontSize: "14px"
+                }}>
+                    Thank you! Your review has been submitted.
+                </div>
+            )}
+
+            {!submitted && appts.length > 0 && (
                 <div style={{ background: "#fff", border: "1px solid #f0d6e0", borderRadius: "12px", padding: "20px", marginBottom: "24px" }}>
                     <h3 style={{ marginBottom: "14px" }}>Leave a Review</h3>
-                    {msg && <p style={{ color: msg.includes("submitted") ? "green" : "red", marginBottom: "10px" }}>{msg}</p>}
+                    {msg && <p style={{ color: "red", marginBottom: "10px" }}>{msg}</p>}
                     <form onSubmit={handleSubmit}>
                         <label>Appointment</label>
                         <select style={inp} value={form.appointmentId} onChange={e => setForm({ ...form, appointmentId: e.target.value })} required>
@@ -59,6 +85,12 @@ export default function Reviews() {
                         </button>
                     </form>
                 </div>
+            )}
+
+            {!submitted && appts.length === 0 && (
+                <p style={{ color: "#888", marginBottom: "20px" }}>
+                    No completed appointments to review yet.
+                </p>
             )}
 
             <h3 style={{ marginBottom: "14px" }}>All Reviews</h3>

@@ -1,4 +1,4 @@
-const { Staff, Service } = require("../models");
+const { Staff, Service, Appointment } = require("../models");
 
 // CREATE STAFF
 exports.createStaff = async (req, res) => {
@@ -52,6 +52,14 @@ exports.updateStaff = async (req, res) => {
 // DELETE STAFF
 exports.deleteStaff = async (req, res) => {
   try {
+    const existing = await Appointment.findOne({
+      where: { staffId: req.params.id, status: ["pending_payment", "confirmed", "rescheduled"] },
+    });
+    if (existing) {
+      return res.status(409).json({
+        message: "Cannot delete staff with active appointments. Cancel or complete them first.",
+      });
+    }
     await Staff.destroy({ where: { id: req.params.id } });
     res.json({ message: "Staff deleted" });
   } catch (error) {
@@ -78,7 +86,7 @@ exports.assignServices = async (req, res) => {
 
     const services = await Service.findAll({ where: { id: serviceIds } });
 
-    console.log("services found:", services.length); // debug
+    console.log("services found:", services.length); 
 
     await staff.setServices(services);
 

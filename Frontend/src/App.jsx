@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Book from "./pages/Book";
 import MyAppointments from "./pages/MyAppointments";
+import MyInvoices from "./pages/MyInvoices";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Reviews from "./pages/Reviews";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -19,9 +20,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route path="/book" element={<ProtectedRoute><Book /></ProtectedRoute>} />
-        <Route path="/appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
-        <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+        <Route path="/book" element={<ProtectedRoute userOnly><Book /></ProtectedRoute>} />
+        <Route path="/appointments" element={<ProtectedRoute userOnly><MyAppointments /></ProtectedRoute>} />
+        <Route path="/invoices" element={<ProtectedRoute userOnly><MyInvoices /></ProtectedRoute>} />
+        <Route path="/payment-success" element={<ProtectedRoute userOnly><PaymentSuccess /></ProtectedRoute>} />
         <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
 

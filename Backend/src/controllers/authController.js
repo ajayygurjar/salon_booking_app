@@ -102,3 +102,16 @@ exports.updateProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+// Admin: list all users
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: { exclude: ["password"] },
+      order: [["createdAt", "DESC"]],
+    });
+    res.json({ success: true, total: users.length, users });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
